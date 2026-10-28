@@ -5,6 +5,18 @@ What the user provides instead is an **OAuth client file** (a small JSON file
 from Google Cloud), followed by a one-time Google sign-in where they click
 "Allow". Explain it to the user in those words, not as an "API key".
 
+**Shortcut:** if the user already has the client file, the quickest path is
+having them run `<skill-dir>/install.sh` in their own Terminal. It does steps
+2 to 4 below in one go.
+
+**Sandboxed or cloud sessions** (e.g. Cowork) usually can't reach
+`oauth2.googleapis.com` / `gmail.googleapis.com`. Check with
+`curl -s -o /dev/null --max-time 8 https://gmail.googleapis.com && echo ok`.
+If it fails, don't attempt the sign-in from there; even with those domains
+allowed, Google's sign-in redirect returns to the user's own Mac, not to the
+sandbox. Instead: have the user run `install.sh` in their own Terminal and work
+from Claude Code on their Mac, or use the Chrome method now.
+
 Prerequisite: `uv` must be installed (`which uv`). If it is missing, ask before
 installing it with `curl -LsSf https://astral.sh/uv/install.sh | sh`.
 
