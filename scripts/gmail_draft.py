@@ -18,6 +18,7 @@ Commands (run with `uv run --script gmail_draft.py <command>`):
     create <draft.json>         create a draft ("-" reads JSON from stdin)
     update <draft_id> <draft.json>  replace a draft's full content
     check <draft_id>            list the links saved in a draft and whether they are clean
+    send <draft_id>             send an existing draft (only after the user approved it in chat)
 
 draft.json fields: to, cc, bcc (lists), subject, html_body, text_body,
 include_signature (default true), reply_to_message_id, attachments (list of file paths).
@@ -232,9 +233,12 @@ def build_message(svc, d: dict) -> dict:
     return message
 
 
-def check_links(svc, draft_id: str) -> dict:
-    """Re-read the saved draft and report whether Gmail kept the links untouched."""
-    raw = svc.users().drafts().get(userId="me", id=draft_id, format="raw").execute()["message"]["raw"]
+def check_links(svc, draft_id: str = "", message_id: str = "") -> dict:
+    """Re-read the saved draft (or sent message) and report whether the links are untouched."""
+    if message_id:
+        raw = svc.users().messages().get(userId="me", id=message_id, format="raw").execute()["raw"]
+    else:
+        raw = svc.users().drafts().get(userId="me", id=draft_id, format="raw").execute()["message"]["raw"]
     parsed = email.message_from_bytes(base64.urlsafe_b64decode(raw), policy=email.policy.default)
     saved = "\n".join(
         part.get_content() for part in parsed.walk() if part.get_content_maintype() == "text"
@@ -282,6 +286,13 @@ def cmd_check(draft_id: str) -> None:
     out({"ok": True, **check_links(gmail(), draft_id)})
 
 
+def cmd_send(draft_id: str) -> None:
+    svc = gmail()
+    sent = svc.users().drafts().send(userId="me", body={"id": draft_id}).execute()
+    out({"ok": True, "sent_message_id": sent["id"], "thread_id": sent.get("threadId"),
+         **check_links(svc, message_id=sent["id"])})
+
+
 COMMANDS = {
     "status": (cmd_status, 0),
     "install-client": (cmd_install_client, 1),
@@ -290,6 +301,7 @@ COMMANDS = {
     "create": (cmd_create, 1),
     "update": (cmd_update, 2),
     "check": (cmd_check, 1),
+    "send": (cmd_send, 1),
 }
 
 if __name__ == "__main__":
