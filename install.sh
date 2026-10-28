@@ -42,7 +42,7 @@ if git -C "$SKILL_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     warn "Could not pull updates (offline or local changes). Continuing with this version."
   fi
 else
-  ok "Installed from a setup file (to update, run the newest setup file again)"
+  ok "Installed without git (to update, run the same install line again)"
 fi
 [[ "$SKILL_DIR" == "$HOME/.claude/skills/gmail-drafts" ]] ||
   warn "The skill is in $SKILL_DIR. Claude Code only finds it in ~/.claude/skills/gmail-drafts."

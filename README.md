@@ -19,15 +19,18 @@ Nothing is ever sent.
 
 ## Install
 
-In your own Terminal (not inside a Claude sandbox or cloud workspace, which
-can't reach Google), with the OAuth client file in your Downloads folder:
+Put the OAuth client file in your Downloads folder, then run this in your own
+Terminal (not inside a Claude sandbox or cloud workspace, which can't reach
+Google). No git or GitHub account needed:
 
 ```bash
-git clone https://github.com/SahbiFaidi1/gmail-drafts-skill.git ~/.claude/skills/gmail-drafts
-~/.claude/skills/gmail-drafts/install.sh
+curl -fsSL https://raw.githubusercontent.com/SahbiFaidi1/gmail-drafts-skill/main/get.sh | bash
 ```
 
-`install.sh` updates the skill, installs [uv](https://docs.astral.sh/uv/) if
+Run the same line again any time to update. Prefer git? Clone into
+`~/.claude/skills/gmail-drafts` and run `install.sh` from there.
+
+The setup (`install.sh`) updates the skill, installs [uv](https://docs.astral.sh/uv/) if
 needed (asks first), checks that Google is reachable, installs the client file,
 opens the one-time Google sign-in, and offers a test draft. It is safe to re-run
 any time to get updates.
