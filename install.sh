@@ -41,6 +41,8 @@ if git -C "$SKILL_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   else
     warn "Could not pull updates (offline or local changes). Continuing with this version."
   fi
+else
+  ok "Installed from a setup file (to update, run the newest setup file again)"
 fi
 [[ "$SKILL_DIR" == "$HOME/.claude/skills/gmail-drafts" ]] ||
   warn "The skill is in $SKILL_DIR. Claude Code only finds it in ~/.claude/skills/gmail-drafts."
@@ -79,7 +81,7 @@ else
   fi
   uv run -q --script "$SCRIPT" install-client "$CLIENT" >/dev/null || die "That is not a valid Desktop OAuth client file."
   ok "Client file installed"
-  warn "You can delete $(basename "$CLIENT") from Downloads now."
+  [[ "$CLIENT" == "$HOME/Downloads/"* ]] && warn "You can delete $(basename "$CLIENT") from Downloads now."
   STATUS="$(uv run -q --script "$SCRIPT" status)"
 fi
 
