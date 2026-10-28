@@ -193,7 +193,7 @@ def build_message(svc, d: dict) -> dict:
                 userId="me",
                 id=reply_to,
                 format="metadata",
-                metadataHeaders=["Message-ID", "References", "Subject", "From", "Reply-To"],
+                metadataHeaders=["Message-ID", "References", "Subject", "From", "Reply-To", "To"],
             )
             .execute()
         )
@@ -206,7 +206,12 @@ def build_message(svc, d: dict) -> dict:
             orig_subject = headers.get("subject", "")
             subject = orig_subject if orig_subject.lower().startswith("re:") else f"Re: {orig_subject}"
         if not to:
-            to = [addr for _, addr in getaddresses([headers.get("reply-to") or headers.get("from", "")])]
+            me = svc.users().getProfile(userId="me").execute()["emailAddress"].lower()
+            sender = [addr for _, addr in getaddresses([headers.get("reply-to") or headers.get("from", "")])]
+            if all(addr.lower() == me for addr in sender):
+                # Following up on our own message: reply to whoever we wrote to.
+                sender = [addr for _, addr in getaddresses([headers.get("to", "")])]
+            to = sender
 
     if to:
         msg["To"] = ", ".join(to)
