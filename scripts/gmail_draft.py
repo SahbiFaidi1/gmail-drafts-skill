@@ -309,4 +309,11 @@ if __name__ == "__main__":
     name, *args = sys.argv[1:] or ["status"]
     if name not in COMMANDS or len(args) != COMMANDS[name][1]:
         fail(f"Usage: {', '.join(COMMANDS)} — see the docstring at the top of this file.")
-    COMMANDS[name][0](*args)
+    try:
+        COMMANDS[name][0](*args)
+    except Exception as e:
+        if type(e).__name__ != "HttpError":
+            raise
+        hint = {404: "Not found: the draft was probably sent or deleted. Create a new one instead.",
+                400: "Gmail rejected the request (e.g. that draft was already sent)."}.get(e.resp.status, "")
+        fail(f"Gmail API error {e.resp.status}: {e.reason}", hint=hint)
