@@ -46,6 +46,8 @@ Run `status`. Its `method` field holds the saved preference:
    ```
    - Write the body as HTML with real `<a href="https://…">` links. `text_body`
      is optional and is generated from the HTML when left out.
+   - To attach files, add `"attachments": ["/path/to/file.pdf"]`. With
+     `update`, list them again or they are dropped.
    - For a reply, set `reply_to_message_id` to the Gmail message id (from the
      connector's `get_thread`); subject, recipient and threading come from it
      when left empty.

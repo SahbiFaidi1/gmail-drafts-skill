@@ -20,7 +20,7 @@ Commands (run with `uv run --script gmail_draft.py <command>`):
     check <draft_id>            list the links saved in a draft and whether they are clean
 
 draft.json fields: to, cc, bcc (lists), subject, html_body, text_body,
-include_signature (default true), reply_to_message_id.
+include_signature (default true), reply_to_message_id, attachments (list of file paths).
 Every command prints one JSON object.
 """
 
@@ -29,6 +29,7 @@ import email
 import email.policy
 import html
 import json
+import mimetypes
 import re
 import shutil
 import sys
@@ -217,6 +218,13 @@ def build_message(svc, d: dict) -> dict:
     msg.set_content(text_body or html_to_text(html_body) or "")
     if html_body:
         msg.add_alternative(html_body, subtype="html")
+    for path in d.get("attachments") or []:
+        file = Path(path).expanduser()
+        if not file.is_file():
+            fail(f"Attachment not found: {file}")
+        ctype = mimetypes.guess_type(file.name)[0] or "application/octet-stream"
+        maintype, subtype = ctype.split("/", 1)
+        msg.add_attachment(file.read_bytes(), maintype=maintype, subtype=subtype, filename=file.name)
 
     message = {"raw": base64.urlsafe_b64encode(msg.as_bytes()).decode()}
     if thread_id:
